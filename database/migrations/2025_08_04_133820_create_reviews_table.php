@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deal_id')->constrained()->onDelete('cascade');
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
-            $table->foreignId('target_client_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('reviewer_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('reviewed_id')->constrained('clients')->onDelete('cascade');
             $table->integer('rating');
             $table->text('comment')->nullable();
+            $table->boolean('is_verified')->default(false);
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

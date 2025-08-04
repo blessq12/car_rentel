@@ -1,61 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CarRental - Платформа аренды автомобилей
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Платформа для аренды автомобилей между частными лицами с системой рейтингов, отзывов и споров.
 
-## About Laravel
+## Установка и запуск
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Клонируйте репозиторий
+2. Установите зависимости: `composer install`
+3. Скопируйте `.env.example` в `.env` и настройте базу данных
+4. Запустите миграции: `php artisan migrate:fresh --seed`
+5. Создайте тестовых пользователей: `php artisan create:test-users`
+6. Запустите сервер: `php artisan serve`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Тестовые пользователи
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Для демонстрации функциональности созданы два тестовых пользователя:
 
-## Learning Laravel
+### Арендодатель (владелец автомобилей)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-   **Email:** owner@test.com
+-   **Пароль:** password
+-   **Telegram:** @ivan_owner
+-   **Описание:** Иван Петров, владеет 2 автомобилями (Toyota Camry, Honda CR-V)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Арендатор (клиент)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   **Email:** renter@test.com
+-   **Пароль:** password
+-   **Telegram:** @anna_renter
+-   **Описание:** Анна Сидорова, арендовала 5 автомобилей
 
-## Laravel Sponsors
+## Функциональность
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Для пользователей
 
-### Premium Partners
+-   Регистрация и авторизация
+-   Просмотр каталога автомобилей
+-   Подача заявок на аренду
+-   Общение в чатах
+-   Система отзывов и рейтингов
+-   Подача споров
+-   Личный кабинет с историей
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Для администраторов
 
-## Contributing
+-   Управление пользователями через Filament
+-   Модерация объявлений
+-   Просмотр статистики
+-   Управление спорами
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Технологии
 
-## Code of Conduct
+-   **Backend:** Laravel 11
+-   **Frontend:** Blade + Tailwind CSS + Alpine.js
+-   **Admin Panel:** Filament
+-   **Database:** MySQL
+-   **PWA:** Service Worker + Manifest
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Структура проекта
 
-## Security Vulnerabilities
+```
+app/
+├── Filament/Resources/     # Админ-панель
+├── Http/Controllers/       # Контроллеры
+├── Models/                 # Модели Eloquent
+└── Enums/                 # Перечисления
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+resources/views/
+├── components/            # Blade компоненты
+├── layouts/              # Шаблоны страниц
+├── auth/                 # Страницы авторизации
+├── profile/              # Личный кабинет
+└── pages/                # Статические страницы
+```
 
-## License
+## Основные модели
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+-   **Client** - пользователи системы
+-   **Car** - автомобили для аренды
+-   **Deal** - сделки аренды
+-   **Chat** - чаты между пользователями
+-   **Review** - отзывы и рейтинги
+-   **Dispute** - споры между пользователями
+-   **City** - города
+-   **Notification** - уведомления
+
+## PWA функции
+
+-   Установка на главный экран
+-   Push-уведомления
+-   Офлайн режим
+-   Быстрый доступ
+
+## Разработка
+
+### Команды
+
+-   `php artisan create:test-users` - создать тестовых пользователей
+-   `php artisan migrate:fresh --seed` - пересоздать БД с демо-данными
+
+### Вход в админ-панель
+
+-   URL: `/admin`
+-   Email: admin@carrental.com
+-   Пароль: password
+
+## TODO
+
+-   [ ] Реальная аутентификация через Laravel Auth
+-   [ ] Интеграция с Telegram Bot API
+-   [ ] Загрузка и хранение фотографий
+-   [ ] Система платежей
+-   [ ] Push-уведомления
+-   [ ] Мобильное приложение

@@ -12,9 +12,18 @@ class Dispute extends Model
 
     protected $fillable = [
         'deal_id',
-        'client_id',
+        'initiator_id',
+        'respondent_id',
+        'type',
         'description',
-        'response',
+        'status',
+        'resolution',
+        'evidence_path',
+        'metadata',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
     ];
 
     public function deal(): BelongsTo
@@ -22,8 +31,13 @@ class Dispute extends Model
         return $this->belongsTo(Deal::class);
     }
 
-    public function client(): BelongsTo
+    public function initiator(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'initiator_id');
+    }
+
+    public function respondent(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'respondent_id');
     }
 }

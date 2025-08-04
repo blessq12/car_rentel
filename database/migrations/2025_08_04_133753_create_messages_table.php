@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('chat_id')->constrained()->onDelete('cascade');
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->foreignId('sender_id')->constrained('clients')->onDelete('cascade');
+            $table->enum('type', ['text', 'photo', 'video'])->default('text');
             $table->text('content');
-            $table->string('media_path')->nullable();
-            $table->enum('media_type', ['text', 'photo', 'video'])->default('text');
+            $table->boolean('is_read')->default(false);
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

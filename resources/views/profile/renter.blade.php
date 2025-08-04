@@ -1,0 +1,316 @@
+@extends('layouts.app')
+
+@section('title', 'Личный кабинет арендатора - CarRental')
+
+@section('content')
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-emerald-50/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Заголовок профиля -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 mb-8">
+                <div class="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+                    <!-- Аватар и основная информация -->
+                    <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        <div
+                            class="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-xl">
+                            <span class="text-white text-3xl font-bold">{{ substr($client->name, 0, 1) }}</span>
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <div
+                                class="flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-3 mb-2">
+                                <h1 class="text-3xl font-bold text-gray-900">{{ $client->name }}</h1>
+                                <span
+                                    class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 font-semibold">
+                                    <i class="fas fa-user mr-2"></i>Арендатор
+                                </span>
+                            </div>
+                            <p class="text-gray-600 mb-2 flex items-center justify-center sm:justify-start">
+                                <i class="fas fa-envelope mr-2 text-blue-500"></i>
+                                {{ $client->email }}
+                            </p>
+                            @if ($client->telegram_nickname)
+                                <p class="text-blue-600 flex items-center justify-center sm:justify-start">
+                                    <i class="fab fa-telegram mr-2"></i>
+                                    {{ $client->telegram_nickname }}
+                                </p>
+                            @endif
+                            <p class="text-gray-500 flex items-center justify-center sm:justify-start">
+                                <i class="fas fa-map-marker-alt mr-2 text-green-500"></i>
+                                {{ $client->city->name }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Статус и рейтинг -->
+                    <div class="flex flex-col items-center lg:items-end space-y-4">
+                        <div class="flex items-center space-x-6">
+                            <div class="text-center">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                                    <span
+                                        class="text-2xl font-bold text-gray-900">{{ number_format($client->rating, 1) }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Рейтинг</p>
+                            </div>
+                            <div class="text-center">
+                                @if ($client->is_verified)
+                                    <div
+                                        class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 font-semibold">
+                                        <i class="fas fa-check-circle mr-2"></i>Верифицирован
+                                    </div>
+                                @else
+                                    <div
+                                        class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 font-semibold">
+                                        <i class="fas fa-clock mr-2"></i>Ожидает верификации
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="mt-8 flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ route('profile.edit') }}"
+                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold">
+                        <i class="fas fa-edit mr-2"></i>Редактировать профиль
+                    </a>
+                    <a href="{{ route('catalog') }}"
+                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold">
+                        <i class="fas fa-search mr-2"></i>Найти автомобиль
+                    </a>
+                    <a href="{{ route('profile.rentals') }}"
+                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold">
+                        <i class="fas fa-history mr-2"></i>История аренд
+                    </a>
+                </div>
+            </div>
+
+            <!-- Статистика арендатора -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div
+                    class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-calendar-check text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Активные аренды</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $myRentals->where('status', 'active')->count() }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-history text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Всего аренд</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $myRentals->count() }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-money-bill-wave text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Потрачено</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalSpent) }} ₽</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-star text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Отзывы</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $myReviews->count() }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основной контент -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Активные аренды -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-4">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-bold text-white flex items-center">
+                                    <i class="fas fa-calendar-check mr-3"></i>Активные аренды
+                                </h2>
+                                <a href="{{ route('profile.rentals') }}"
+                                    class="text-green-100 hover:text-white text-sm font-medium transition-colors duration-300">
+                                    История аренд
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if ($myRentals->where('status', 'active')->count() > 0)
+                                <div class="space-y-4">
+                                    @foreach ($myRentals->where('status', 'active')->take(3) as $rental)
+                                        <div
+                                            class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 hover:shadow-lg transition-all duration-300 border border-gray-200/50">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center space-x-4">
+                                                    <div
+                                                        class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-car text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="font-bold text-gray-900">{{ $rental->car->brand }}
+                                                            {{ $rental->car->model }}</h3>
+                                                        <p class="text-sm text-gray-600 flex items-center">
+                                                            <i class="fas fa-calendar mr-1 text-blue-500"></i>
+                                                            {{ $rental->car->year }} •
+                                                            {{ $rental->car->fuel_type->value }}
+                                                        </p>
+                                                        <p class="text-sm text-gray-600 flex items-center">
+                                                            <i class="fas fa-user mr-1 text-green-500"></i>
+                                                            Владелец: {{ $rental->client->name }}
+                                                        </p>
+                                                        <p class="text-sm text-gray-500 flex items-center">
+                                                            <i class="fas fa-calendar-alt mr-1 text-purple-500"></i>
+                                                            {{ $rental->start_date->format('d.m.Y') }} -
+                                                            {{ $rental->end_date->format('d.m.Y') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="font-bold text-blue-600 text-lg">
+                                                        {{ number_format($rental->total_price) }} ₽</p>
+                                                    <p class="text-sm text-gray-500">всего</p>
+                                                    <span
+                                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 mt-2">
+                                                        <i class="fas fa-check-circle mr-1"></i>Активна
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-12">
+                                    <div
+                                        class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="fas fa-calendar-check text-3xl text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-700 mb-4">У вас пока нет активных аренд</h3>
+                                    <p class="text-gray-500 mb-6">Найдите подходящий автомобиль и начните путешествие</p>
+                                    <a href="{{ route('catalog') }}"
+                                        class="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold">
+                                        <i class="fas fa-search mr-2"></i>Найти автомобиль для аренды
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Последние отзывы -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+                        <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-bold text-white flex items-center">
+                                    <i class="fas fa-star mr-3"></i>Мои отзывы
+                                </h2>
+                                <a href="{{ route('profile.reviews') }}"
+                                    class="text-yellow-100 hover:text-white text-sm font-medium transition-colors duration-300">
+                                    Все отзывы
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            @if ($myReviews->count() > 0)
+                                <div class="space-y-4">
+                                    @foreach ($myReviews->take(3) as $review)
+                                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
+                                            <div class="flex items-start space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <div
+                                                        class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                                                        <span
+                                                            class="text-white text-xs font-bold">{{ substr($review->reviewed->name, 0, 1) }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <p class="font-bold text-gray-900">{{ $review->reviewed->name }}
+                                                        </p>
+                                                        <div class="flex items-center">
+                                                            @for ($i = 1; $i <= 5; $i++)
+                                                                <i
+                                                                    class="fas fa-star {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }} text-sm"></i>
+                                                            @endfor
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-sm text-gray-600">
+                                                        {{ Str::limit($review->comment, 100) }}</p>
+                                                    <p class="text-xs text-gray-500 mt-2 flex items-center">
+                                                        <i class="fas fa-calendar mr-1"></i>
+                                                        {{ $review->created_at->format('d.m.Y') }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-12">
+                                    <div
+                                        class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <i class="fas fa-star text-3xl text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-700 mb-4">Пока нет отзывов</h3>
+                                    <p class="text-gray-500">После завершения аренды вы сможете оставить отзыв</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Быстрые действия -->
+                    <div class="mt-6 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            Быстрые действия
+                        </h3>
+                        <div class="space-y-3">
+                            <a href="{{ route('chat.index') }}"
+                                class="flex items-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:from-blue-100 hover:to-cyan-100 transition-all duration-300">
+                                <i class="fas fa-comments text-blue-500 mr-3"></i>
+                                <span class="font-medium text-gray-700">Чаты</span>
+                            </a>
+                            <a href="{{ route('disputes.index') }}"
+                                class="flex items-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl hover:from-orange-100 hover:to-red-100 transition-all duration-300">
+                                <i class="fas fa-exclamation-triangle text-orange-500 mr-3"></i>
+                                <span class="font-medium text-gray-700">Споры</span>
+                            </a>
+                            <a href="{{ route('profile.reviews') }}"
+                                class="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl hover:from-yellow-100 hover:to-orange-100 transition-all duration-300">
+                                <i class="fas fa-star text-yellow-500 mr-3"></i>
+                                <span class="font-medium text-gray-700">Отзывы</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

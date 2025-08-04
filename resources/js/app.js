@@ -1,39 +1,48 @@
 /**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
+ * CarRental JavaScript
  */
 
-import './bootstrap';
-import { createApp } from 'vue';
+import "./bootstrap";
 
-/**
- * Next, we will create a fresh Vue application instance. You may then begin
- * registering components with the application instance so they are ready
- * to use in your application's views. An example is included for you.
- */
+// Alpine.js
+import Alpine from "alpinejs";
+window.Alpine = Alpine;
+Alpine.start();
 
-const app = createApp({});
+// Мобильное меню
+document.addEventListener("DOMContentLoaded", function () {
+    // Инициализация мобильного меню
+    const mobileMenuButton = document.querySelector("[data-mobile-menu]");
+    const mobileMenu = document.querySelector("[data-mobile-menu-panel]");
 
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener("click", function () {
+            mobileMenu.classList.toggle("hidden");
+        });
+    }
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
+    // Закрытие мобильного меню при клике вне его
+    document.addEventListener("click", function (event) {
+        if (
+            !mobileMenu?.contains(event.target) &&
+            !mobileMenuButton?.contains(event.target)
+        ) {
+            mobileMenu?.classList.add("hidden");
+        }
+    });
+});
 
-// Object.entries(import.meta.glob('./**/*.vue', { eager: true })).forEach(([path, definition]) => {
-//     app.component(path.split('/').pop().replace(/\.\w+$/, ''), definition.default);
-// });
+// Уведомления
+window.showNotification = function (message, type = "success") {
+    const notification = document.createElement("div");
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+    }`;
+    notification.textContent = message;
 
-/**
- * Finally, we will attach the application instance to a HTML element with
- * an "id" attribute of "app". This element is included with the "auth"
- * scaffolding. Otherwise, you will need to add an element yourself.
- */
+    document.body.appendChild(notification);
 
-app.mount('#app');
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+};

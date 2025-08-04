@@ -12,14 +12,18 @@ class Review extends Model
 
     protected $fillable = [
         'deal_id',
-        'client_id',
-        'target_client_id',
+        'reviewer_id',
+        'reviewed_id',
         'rating',
         'comment',
+        'is_verified',
+        'metadata',
     ];
 
     protected $casts = [
         'rating' => 'integer',
+        'is_verified' => 'boolean',
+        'metadata' => 'array',
     ];
 
     public function deal(): BelongsTo
@@ -27,13 +31,13 @@ class Review extends Model
         return $this->belongsTo(Deal::class);
     }
 
-    public function client(): BelongsTo
+    public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsTo(Client::class, 'reviewer_id');
     }
 
-    public function targetClient(): BelongsTo
+    public function reviewed(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'target_client_id');
+        return $this->belongsTo(Client::class, 'reviewed_id');
     }
 }

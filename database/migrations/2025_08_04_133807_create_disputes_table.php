@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('disputes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('deal_id')->constrained()->onDelete('cascade');
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->foreignId('initiator_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('respondent_id')->constrained('clients')->onDelete('cascade');
+            $table->string('type');
             $table->text('description');
-            $table->text('response')->nullable();
+            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
+            $table->text('resolution')->nullable();
+            $table->string('evidence_path')->nullable();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

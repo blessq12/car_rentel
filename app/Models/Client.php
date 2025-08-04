@@ -69,17 +69,22 @@ class Client extends Model
 
     public function disputes(): HasMany
     {
-        return $this->hasMany(Dispute::class);
+        return $this->hasMany(Dispute::class, 'initiator_id');
+    }
+
+    public function respondentDisputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class, 'respondent_id');
     }
 
     public function reviews(): HasMany
     {
-        return $this->hasMany(Review::class, 'client_id');
+        return $this->hasMany(Review::class, 'reviewer_id');
     }
 
     public function receivedReviews(): HasMany
     {
-        return $this->hasMany(Review::class, 'target_client_id');
+        return $this->hasMany(Review::class, 'reviewed_id');
     }
 
     public function notifications(): MorphMany

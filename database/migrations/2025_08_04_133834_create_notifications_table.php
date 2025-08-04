@@ -16,8 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('notifiable_id');
             $table->string('notifiable_type');
             $table->enum('type', ['deal_request', 'message', 'dispute']);
-            $table->text('content');
-            $table->boolean('is_read')->default(false);
+            $table->string('title');
+            $table->text('message');
+            $table->json('data')->nullable();
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
             $table->index(['notifiable_type', 'notifiable_id']);
