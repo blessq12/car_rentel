@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\ConversationMessage;
 use App\Models\Deal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -48,5 +49,40 @@ class ChatFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'is_active' => false,
         ]);
+    }
+
+    /**
+     * Создать чат с сообщениями
+     */
+    public function withMessages(int $count = 5): static
+    {
+        return $this->afterCreating(function ($chat) use ($count) {
+            // Создаем системное сообщение о создании чата
+            ConversationMessage::factory()
+                ->forChat($chat)
+                ->system()
+                ->create();
+
+            // Создаем обычные сообщения
+            for ($i = 0; $i < $count; $i++) {
+                $messageType = fake()->randomElement(['text', 'photo', 'file']);
+
+                $message = ConversationMessage::factory()
+                    ->forChat($chat)
+                    ->$messageType()
+                    ->create([
+                        'sender_id' => fake()->randomElement([$chat->client_id, $chat->renter_id]),
+                        'created_at' => fake()->dateTimeBetween('-1 week', 'now'),
+                    ]);
+            }
+        });
+    }
+
+    /**
+     * Создать активный чат с сообщениями
+     */
+    public function activeWithMessages(int $count = 8): static
+    {
+        return $this->active()->withMessages($count);
     }
 }

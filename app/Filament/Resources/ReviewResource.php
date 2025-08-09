@@ -31,15 +31,15 @@ class ReviewResource extends Resource
                     ->required()
                     ->label('Сделка'),
 
-                Forms\Components\Select::make('client_id')
-                    ->relationship('client', 'name')
+                Forms\Components\Select::make('reviewer_id')
+                    ->relationship('reviewer', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
                     ->label('Автор'),
 
-                Forms\Components\Select::make('target_client_id')
-                    ->relationship('targetClient', 'name')
+                Forms\Components\Select::make('reviewed_id')
+                    ->relationship('reviewed', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
@@ -56,6 +56,9 @@ class ReviewResource extends Resource
                     ->maxLength(1000)
                     ->label('Комментарий'),
 
+                Forms\Components\Toggle::make('is_verified')
+                    ->label('Верифицирован'),
+
                 Forms\Components\KeyValue::make('metadata')
                     ->label('Дополнительные данные'),
             ]);
@@ -65,15 +68,16 @@ class ReviewResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('client.name')
+                Tables\Columns\TextColumn::make('reviewer_name')
                     ->searchable()
                     ->sortable()
                     ->label('Автор'),
 
-                Tables\Columns\TextColumn::make('targetClient.name')
+                Tables\Columns\TextColumn::make('reviewed_name')
                     ->searchable()
                     ->sortable()
-                    ->label('Получатель'),
+                    ->label('Получатель')
+                    ->description(fn($record) => $record->isReviewedTaxiCompany() ? 'Таксопарк' : 'Частное лицо'),
 
                 Tables\Columns\TextColumn::make('rating')
                     ->sortable()
@@ -87,19 +91,42 @@ class ReviewResource extends Resource
                     ->sortable()
                     ->label('Сделка'),
 
+                Tables\Columns\IconColumn::make('is_verified')
+                    ->boolean()
+                    ->label('Верифицирован'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->label('Создано'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('client')
-                    ->relationship('client', 'name')
+                Tables\Filters\SelectFilter::make('reviewer')
+                    ->relationship('reviewer', 'name')
                     ->label('Автор'),
 
-                Tables\Filters\SelectFilter::make('targetClient')
-                    ->relationship('targetClient', 'name')
-                    ->label('Получатель'),
+                Tables\Filters\SelectFilter::make('reviewed_type')
+                    ->options([
+                        'private' => 'Частные лица',
+                        'taxi_company' => 'Таксопарки',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if ($data['value'] === 'private') {
+                            return $query->whereHas('deal.car', function ($q) {
+                                $q->whereNull('taxi_company_id');
+                            });
+                        }
+                        if ($data['value'] === 'taxi_company') {
+                            return $query->whereHas('deal.car', function ($q) {
+                                $q->whereNotNull('taxi_company_id');
+                            });
+                        }
+                        return $query;
+                    })
+                    ->label('Тип получателя'),
+
+                Tables\Filters\TernaryFilter::make('is_verified')
+                    ->label('Верифицирован'),
 
                 Tables\Filters\Filter::make('rating')
                     ->form([

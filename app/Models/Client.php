@@ -87,6 +87,11 @@ class Client extends Model
         return $this->hasMany(Review::class, 'reviewed_id');
     }
 
+    public function taxiCompanies(): HasMany
+    {
+        return $this->hasMany(TaxiCompany::class);
+    }
+
     public function notifications(): MorphMany
     {
         return $this->morphMany(Notification::class, 'notifiable');

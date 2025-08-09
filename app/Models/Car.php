@@ -14,6 +14,7 @@ class Car extends Model
 
     protected $fillable = [
         'client_id',
+        'taxi_company_id',
         'city_id',
         'brand',
         'model',
@@ -39,6 +40,11 @@ class Car extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function taxiCompany(): BelongsTo
+    {
+        return $this->belongsTo(TaxiCompany::class);
+    }
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
@@ -47,5 +53,26 @@ class Car extends Model
     public function deals(): HasMany
     {
         return $this->hasMany(Deal::class);
+    }
+
+    // Получить владельца (клиент или таксопарк)
+    public function getOwnerAttribute()
+    {
+        return $this->taxiCompany ?? $this->client;
+    }
+
+    // Проверить, принадлежит ли автомобиль таксопарку
+    public function isOwnedByTaxiCompany(): bool
+    {
+        return !is_null($this->taxi_company_id);
+    }
+
+    // Получить название владельца
+    public function getOwnerNameAttribute(): string
+    {
+        if ($this->isOwnedByTaxiCompany()) {
+            return $this->taxiCompany->name;
+        }
+        return $this->client->name;
     }
 }

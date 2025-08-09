@@ -29,9 +29,13 @@ class CityResource extends Resource
                     ->maxLength(255)
                     ->label('Название'),
 
-                Forms\Components\TextInput::make('code')
-                    ->maxLength(10)
-                    ->label('Код'),
+                Forms\Components\TextInput::make('region')
+                    ->maxLength(255)
+                    ->label('Регион'),
+
+                Forms\Components\TextInput::make('timezone')
+                    ->maxLength(255)
+                    ->label('Часовой пояс'),
 
                 Forms\Components\Toggle::make('is_active')
                     ->label('Активен'),
@@ -47,10 +51,15 @@ class CityResource extends Resource
                     ->sortable()
                     ->label('Название'),
 
-                Tables\Columns\TextColumn::make('code')
+                Tables\Columns\TextColumn::make('region')
                     ->searchable()
                     ->sortable()
-                    ->label('Код'),
+                    ->label('Регион'),
+
+                Tables\Columns\TextColumn::make('timezone')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Часовой пояс'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()

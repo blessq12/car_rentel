@@ -40,4 +40,29 @@ class Review extends Model
     {
         return $this->belongsTo(Client::class, 'reviewed_id');
     }
+
+    // Получить название того, кто оставил отзыв
+    public function getReviewerNameAttribute(): string
+    {
+        return $this->reviewer->name;
+    }
+
+    // Получить название того, о ком отзыв
+    public function getReviewedNameAttribute(): string
+    {
+        // Проверяем, является ли reviewed владельцем автомобиля из сделки
+        if ($this->deal && $this->deal->car) {
+            return $this->deal->car->owner_name;
+        }
+        return $this->reviewed->name;
+    }
+
+    // Проверить, является ли reviewed таксопарком
+    public function isReviewedTaxiCompany(): bool
+    {
+        if ($this->deal && $this->deal->car) {
+            return $this->deal->car->isOwnedByTaxiCompany();
+        }
+        return false;
+    }
 }

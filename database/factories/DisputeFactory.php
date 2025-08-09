@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\ConversationMessage;
 use App\Models\Deal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -97,5 +98,110 @@ class DisputeFactory extends Factory
             'status' => 'closed',
             'resolution' => fake()->sentence(),
         ]);
+    }
+
+    /**
+     * Создать диспут с сообщениями
+     */
+    public function withMessages(int $count = 3): static
+    {
+        return $this->afterCreating(function ($dispute) use ($count) {
+            // Создаем системное сообщение об открытии спора
+            ConversationMessage::factory()
+                ->forDispute($dispute)
+                ->system()
+                ->create([
+                    'content' => "Открыт спор: {$dispute->type}",
+                ]);
+
+            // Создаем сообщения от участников спора
+            for ($i = 0; $i < $count; $i++) {
+                $messageType = fake()->randomElement(['text', 'file']);
+                $senderId = fake()->randomElement([$dispute->initiator_id, $dispute->respondent_id]);
+
+                $message = ConversationMessage::factory()
+                    ->forDispute($dispute)
+                    ->$messageType()
+                    ->create([
+                        'sender_id' => $senderId,
+                        'content' => $this->getDisputeMessageContent($dispute->type, $messageType),
+                        'created_at' => fake()->dateTimeBetween('-1 month', 'now'),
+                    ]);
+            }
+
+            // Если диспут решен, добавляем системное сообщение
+            if (in_array($dispute->status, ['resolved', 'closed'])) {
+                ConversationMessage::factory()
+                    ->forDispute($dispute)
+                    ->system()
+                    ->create([
+                        'content' => "Спор решен: {$dispute->resolution}",
+                        'created_at' => fake()->dateTimeBetween('-1 week', 'now'),
+                    ]);
+            }
+        });
+    }
+
+    /**
+     * Получить контент сообщения для спора
+     */
+    private function getDisputeMessageContent(string $disputeType, string $messageType): string
+    {
+        if ($messageType === 'file') {
+            return 'Документ по спору';
+        }
+
+        $messages = [
+            'Повреждение автомобиля' => [
+                'Предоставляю фотографии повреждений',
+                'Эти повреждения были до аренды',
+                'Требую компенсации за ущерб',
+                'Готов обсудить компромиссное решение'
+            ],
+            'Неоплата аренды' => [
+                'Оплата не поступила в срок',
+                'У меня технические проблемы с картой',
+                'Деньги списались, проверьте',
+                'Перенесу оплату на завтра'
+            ],
+            'Нарушение условий договора' => [
+                'Условия договора нарушены',
+                'Я не нарушал никаких условий',
+                'Предоставлю доказательства',
+                'Готов исправить ситуацию'
+            ],
+            'Проблемы с техническим состоянием' => [
+                'Автомобиль не заводится',
+                'Проблемы с тормозами',
+                'Проверю техническое состояние',
+                'Вызвал эвакуатор'
+            ]
+        ];
+
+        $defaultMessages = [
+            'Предоставляю доказательства',
+            'Готов обсудить решение',
+            'Требую разбирательства',
+            'Согласен на компромисс'
+        ];
+
+        $typeMessages = $messages[$disputeType] ?? $defaultMessages;
+        return fake()->randomElement($typeMessages);
+    }
+
+    /**
+     * Создать открытый диспут с сообщениями
+     */
+    public function openWithMessages(int $count = 5): static
+    {
+        return $this->open()->withMessages($count);
+    }
+
+    /**
+     * Создать решенный диспут с сообщениями
+     */
+    public function resolvedWithMessages(int $count = 8): static
+    {
+        return $this->resolved()->withMessages($count);
     }
 }

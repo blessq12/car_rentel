@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DealResource\Pages;
 use App\Models\Deal;
 use App\Enums\DealStatus;
+use App\Enums\DealType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -46,6 +47,11 @@ class DealResource extends Resource
                     ->required()
                     ->label('Арендатор'),
 
+                Forms\Components\Select::make('deal_type')
+                    ->options(DealType::class)
+                    ->required()
+                    ->label('Тип сделки'),
+
                 Forms\Components\Select::make('status')
                     ->options(DealStatus::class)
                     ->required()
@@ -77,15 +83,22 @@ class DealResource extends Resource
                     ->sortable()
                     ->label('Автомобиль'),
 
-                Tables\Columns\TextColumn::make('client.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Владелец'),
+                Tables\Columns\TextColumn::make('owner_name')
+                    ->label('Владелец')
+                    ->description(fn($record) => $record->car->isOwnedByTaxiCompany() ? 'Таксопарк' : 'Частное лицо'),
 
                 Tables\Columns\TextColumn::make('renter.name')
                     ->searchable()
                     ->sortable()
                     ->label('Арендатор'),
+
+                Tables\Columns\BadgeColumn::make('deal_type')
+                    ->colors([
+                        'primary' => DealType::RENTAL_WITHOUT_DEPOSIT,
+                        'warning' => DealType::RENTAL_WITH_DEPOSIT,
+                        'success' => DealType::RENT_TO_OWN,
+                    ])
+                    ->label('Тип сделки'),
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
@@ -113,6 +126,30 @@ class DealResource extends Resource
                     ->label('Создано'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('owner_type')
+                    ->options([
+                        'private' => 'Частные лица',
+                        'taxi_company' => 'Таксопарки',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if ($data['value'] === 'private') {
+                            return $query->whereHas('car', function ($q) {
+                                $q->whereNull('taxi_company_id');
+                            });
+                        }
+                        if ($data['value'] === 'taxi_company') {
+                            return $query->whereHas('car', function ($q) {
+                                $q->whereNotNull('taxi_company_id');
+                            });
+                        }
+                        return $query;
+                    })
+                    ->label('Тип владельца'),
+
+                Tables\Filters\SelectFilter::make('deal_type')
+                    ->options(DealType::class)
+                    ->label('Тип сделки'),
+
                 Tables\Filters\SelectFilter::make('status')
                     ->options(DealStatus::class)
                     ->label('Статус'),
@@ -143,7 +180,7 @@ class DealResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\DealResource\RelationManagers\ReviewsRelationManager::class,
         ];
     }
 
@@ -155,4 +192,4 @@ class DealResource extends Resource
             'edit' => Pages\EditDeal::route('/{record}/edit'),
         ];
     }
-} 
+}

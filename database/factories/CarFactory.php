@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\FuelType;
 use App\Models\City;
 use App\Models\Client;
+use App\Models\TaxiCompany;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -73,7 +74,8 @@ class CarFactory extends Factory
 
         return [
             'client_id' => Client::factory(),
-            'city_id' => City::factory(),
+            'taxi_company_id' => null,
+            'city_id' => null, // Будет установлено в сидере
             'brand' => fake()->randomElement($brands),
             'model' => fake()->randomElement($models),
             'year' => fake()->numberBetween(2010, 2024),
@@ -81,12 +83,34 @@ class CarFactory extends Factory
             'price_per_day' => fake()->numberBetween(1000, 5000),
             'is_promoted' => fake()->boolean(20),
             'is_moderated' => fake()->boolean(90),
-            'metadata' => json_encode([
+            'metadata' => [
                 'transmission' => fake()->randomElement(['manual', 'automatic']),
                 'engine_size' => fake()->randomFloat(1, 1.0, 3.0),
                 'mileage' => fake()->numberBetween(10000, 200000),
-            ]),
+            ],
         ];
+    }
+
+    /**
+     * Indicate that the car belongs to a taxi company.
+     */
+    public function forTaxiCompany(TaxiCompany $taxiCompany = null): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'client_id' => $taxiCompany ? $taxiCompany->client_id : Client::factory(),
+            'taxi_company_id' => $taxiCompany ? $taxiCompany->id : TaxiCompany::factory(),
+        ]);
+    }
+
+    /**
+     * Indicate that the car belongs to a private client.
+     */
+    public function forPrivateClient(Client $client = null): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'client_id' => $client ? $client->id : Client::factory(),
+            'taxi_company_id' => null,
+        ]);
     }
 
     /**

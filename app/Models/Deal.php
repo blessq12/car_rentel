@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DealStatus;
+use App\Enums\DealType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ class Deal extends Model
         'client_id',
         'renter_id',
         'status',
+        'deal_type',
         'contract_path',
         'start_date',
         'end_date',
@@ -30,6 +32,7 @@ class Deal extends Model
         'end_date' => 'date',
         'metadata' => 'array',
         'status' => DealStatus::class,
+        'deal_type' => DealType::class,
     ];
 
     public function car(): BelongsTo
@@ -45,6 +48,18 @@ class Deal extends Model
     public function renter(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'renter_id');
+    }
+
+    // Получить арендодателя (клиент или таксопарк)
+    public function getOwnerAttribute()
+    {
+        return $this->car->owner;
+    }
+
+    // Получить название арендодателя
+    public function getOwnerNameAttribute(): string
+    {
+        return $this->car->owner_name;
     }
 
     public function chat(): HasOne

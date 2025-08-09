@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->foreignId('renter_id')->constrained('clients')->onDelete('cascade');
             $table->enum('status', ['pending', 'accepted', 'completed', 'canceled'])->default('pending');
+            $table->enum('deal_type', ['rental_without_deposit', 'rental_with_deposit', 'rent_to_own'])->default('rental_without_deposit');
             $table->string('contract_path')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

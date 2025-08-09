@@ -8,7 +8,6 @@ use App\Models\City;
 use App\Models\Client;
 use App\Models\Deal;
 use App\Models\Dispute;
-use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Review;
 use App\Models\User;
@@ -21,8 +20,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $faker = \Faker\Factory::create();
+
         // Создаем города
-        $cities = City::factory(15)->create();
+        $cityNames = [
+            'Москва',
+            'Санкт-Петербург',
+            'Новосибирск',
+            'Екатеринбург',
+            'Казань',
+            'Нижний Новгород',
+            'Челябинск',
+            'Самара',
+            'Уфа',
+            'Ростов-на-Дону',
+            'Краснодар',
+            'Воронеж',
+            'Пермь',
+            'Волгоград',
+            'Саратов'
+        ];
+
+        $cities = collect();
+        foreach ($cityNames as $name) {
+            $city = City::firstOrCreate(['name' => $name], [
+                'is_active' => true,
+            ]);
+            $cities->push($city);
+        }
 
         // Создаем клиентов
         $clients = Client::factory(50)->create([
@@ -42,17 +67,11 @@ class DatabaseSeeder extends Seeder
             'renter_id' => fn() => $clients->random()->id,
         ]);
 
-        // Создаем чаты
-        $chats = Chat::factory(60)->create([
+        // Создаем чаты с сообщениями
+        $chats = Chat::factory(60)->withMessages()->create([
             'deal_id' => fn() => $deals->random()->id,
             'client_id' => fn() => $clients->random()->id,
             'renter_id' => fn() => $clients->random()->id,
-        ]);
-
-        // Создаем сообщения
-        Message::factory(200)->create([
-            'chat_id' => fn() => $chats->random()->id,
-            'sender_id' => fn() => $clients->random()->id,
         ]);
 
         // Создаем отзывы
@@ -62,8 +81,8 @@ class DatabaseSeeder extends Seeder
             'reviewed_id' => fn() => $clients->random()->id,
         ]);
 
-        // Создаем споры
-        Dispute::factory(30)->create([
+        // Создаем споры с сообщениями
+        $disputes = Dispute::factory(30)->withMessages()->create([
             'deal_id' => fn() => $deals->random()->id,
             'initiator_id' => fn() => $clients->random()->id,
             'respondent_id' => fn() => $clients->random()->id,
@@ -75,16 +94,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Создаем админа
-        User::factory()->create([
+        User::firstOrCreate(['email' => 'admin@carrental.com'], [
             'name' => 'Admin',
-            'email' => 'admin@carrental.com',
             'password' => bcrypt('password'),
         ]);
 
         // Создаем тестового клиента
-        Client::factory()->create([
+        Client::firstOrCreate(['email' => 'test@example.com'], [
             'name' => 'Тестовый Пользователь',
-            'email' => 'test@example.com',
             'telegram_nickname' => '@testuser',
             'phone' => '+7 (999) 123-45-67',
             'city_id' => $cities->first()->id,
@@ -99,7 +116,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Создаем несколько активных сделок
-        Deal::factory(10)->active()->create([
+        Deal::factory(10)->accepted()->create([
             'car_id' => fn() => $cars->random()->id,
             'client_id' => fn() => $clients->random()->id,
             'renter_id' => fn() => $clients->random()->id,
@@ -110,11 +127,18 @@ class DatabaseSeeder extends Seeder
             'notifiable_id' => fn() => $clients->random()->id,
         ]);
 
-        // Создаем несколько открытых споров
-        Dispute::factory(5)->open()->create([
+        // Создаем несколько открытых споров с сообщениями
+        Dispute::factory(5)->openWithMessages()->create([
             'deal_id' => fn() => $deals->random()->id,
             'initiator_id' => fn() => $clients->random()->id,
             'respondent_id' => fn() => $clients->random()->id,
+        ]);
+
+        // Создаем несколько активных чатов с сообщениями
+        Chat::factory(10)->activeWithMessages()->create([
+            'deal_id' => fn() => $deals->random()->id,
+            'client_id' => fn() => $clients->random()->id,
+            'renter_id' => fn() => $clients->random()->id,
         ]);
     }
 }

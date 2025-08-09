@@ -18,7 +18,7 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'city_id' => City::factory(),
+            'city_id' => null, // Будет установлено в сидере
             'email' => fake()->unique()->safeEmail(),
             'telegram_nickname' => fake()->optional(0.7)->userName(),
             'name' => fake()->name(),

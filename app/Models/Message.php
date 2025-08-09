@@ -13,14 +13,18 @@ class Message extends Model
 
     protected $fillable = [
         'chat_id',
-        'client_id',
+        'dispute_id',
+        'sender_id',
+        'type',
         'content',
-        'media_path',
-        'media_type',
+        'is_read',
+        'metadata',
     ];
 
     protected $casts = [
-        'media_type' => MessageType::class,
+        'type' => MessageType::class,
+        'is_read' => 'boolean',
+        'metadata' => 'array',
     ];
 
     public function chat(): BelongsTo
@@ -28,8 +32,13 @@ class Message extends Model
         return $this->belongsTo(Chat::class);
     }
 
-    public function client(): BelongsTo
+    public function sender(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'sender_id');
+    }
+
+    public function dispute(): BelongsTo
+    {
+        return $this->belongsTo(Dispute::class);
     }
 }

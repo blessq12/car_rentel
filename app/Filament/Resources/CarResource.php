@@ -34,6 +34,13 @@ class CarResource extends Resource
                     ->required()
                     ->label('Владелец'),
 
+                Forms\Components\Select::make('taxi_company_id')
+                    ->relationship('taxiCompany', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->label('Таксопарк')
+                    ->placeholder('Выберите таксопарк (необязательно)'),
+
                 Forms\Components\Select::make('city_id')
                     ->relationship('city', 'name')
                     ->searchable()
@@ -94,6 +101,15 @@ class CarResource extends Resource
                     ->sortable()
                     ->label('Модель'),
 
+                Tables\Columns\TextColumn::make('owner_name')
+                    ->label('Владелец')
+                    ->description(fn($record) => $record->isOwnedByTaxiCompany() ? 'Таксопарк' : 'Частное лицо'),
+
+                Tables\Columns\TextColumn::make('city.name')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Город'),
+
                 Tables\Columns\TextColumn::make('year')
                     ->sortable()
                     ->label('Год'),
@@ -107,23 +123,13 @@ class CarResource extends Resource
                     ->sortable()
                     ->label('Цена/день'),
 
-                Tables\Columns\TextColumn::make('client.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Владелец'),
-
-                Tables\Columns\TextColumn::make('city.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Город'),
-
                 Tables\Columns\IconColumn::make('is_promoted')
                     ->boolean()
                     ->label('Продвигается'),
 
                 Tables\Columns\IconColumn::make('is_moderated')
                     ->boolean()
-                    ->label('Модерация'),
+                    ->label('Промодерирован'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -132,13 +138,34 @@ class CarResource extends Resource
                     ->label('Создано'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('fuel_type')
-                    ->options(FuelType::class)
-                    ->label('Тип топлива'),
+                Tables\Filters\SelectFilter::make('owner_type')
+                    ->options([
+                        'private' => 'Частные лица',
+                        'taxi_company' => 'Таксопарки',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if ($data['value'] === 'private') {
+                            return $query->whereNull('taxi_company_id');
+                        }
+                        if ($data['value'] === 'taxi_company') {
+                            return $query->whereNotNull('taxi_company_id');
+                        }
+                        return $query;
+                    })
+                    ->label('Тип владельца'),
 
                 Tables\Filters\SelectFilter::make('city')
                     ->relationship('city', 'name')
                     ->label('Город'),
+
+                Tables\Filters\SelectFilter::make('fuel_type')
+                    ->options([
+                        'petrol' => 'Бензин',
+                        'diesel' => 'Дизель',
+                        'electric' => 'Электро',
+                        'hybrid' => 'Гибрид',
+                    ])
+                    ->label('Топливо'),
 
                 Tables\Filters\TernaryFilter::make('is_promoted')
                     ->label('Продвигается'),
@@ -160,7 +187,7 @@ class CarResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\CarResource\RelationManagers\DealsRelationManager::class,
         ];
     }
 
@@ -172,4 +199,4 @@ class CarResource extends Resource
             'edit' => Pages\EditCar::route('/{record}/edit'),
         ];
     }
-} 
+}
